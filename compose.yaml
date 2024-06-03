@@ -15,7 +15,8 @@ services:
     depends_on:
       - todo-database
     environment:
-      NODE_ENV: production
+      # NODE_ENV: production
+      NODE_ENV: development
     ports:
       - 3000:3000
       - 35729:35729
@@ -23,6 +24,9 @@ services:
       watch:
         - path: ./app/package.json
           action: rebuild
+        # - path: ./app
+        #   target: /usr/src/app
+        #   action: sync
         - path: ./app
           target: /usr/src/app
           action: sync

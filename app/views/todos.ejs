@@ -6,20 +6,43 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Todo App</title>
-    <link rel="stylesheet" href="//stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css"
-        integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
-    <link rel="stylesheet" href="//stackpath.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css">
+    <link rel="stylesheet" href="/output.css">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.css" rel="stylesheet" />
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Teachers&display=swap" rel="stylesheet">
+    <style>
+        input[type="checkbox"].task-checkbox:checked + .checkmark {
+            background-color: #000000; /* Change color of checkmark */
+        }
+    </style>
 </head>
 
-<body>
-    <div class="container m-5 p-2 rounded mx-auto bg-light shadow">
+<body class="bg-gray-800">
+    <script src="/flowbite/dist/flowbite.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/flowbite/2.3.0/flowbite.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+
+    <div class="container p-8 rounded bg-gray-100 shadow-xl w-1/2 mx-auto">
         
         <!-- App title section -->
         <div class="row m-1 p-4">
-            <div class="col">
-                <div class="p-1 h1 text-primary text-center mx-auto display-inline-block">
-                    <u>Todo App</u>
+            <div class="border-2 rounded-lg border-gray-300 p-8 bg-gray-800">
+                <div class="p-1 text-7xl text-primary text-center mx-auto font-teachers" id="daily-objectives">
+                    Daily Objectives
                 </div>
+                <div class="text-xl" id="total-completed">
+                    Total Completed: <%= totalCompleted %>
+                </div>
+            </div>
+            <div class="w-full flex bg-gray-200 h-8 rounded mt-8">
+                <% for (let i = 0; i < completedTasks; i++) { %>
+                    <!-- <div class="task-div h-full grow border-2 rounded border-gray-800" style="background-color: #80f871"></div> -->
+                    <div class="task-div h-full grow border-2 rounded border-gray-800"></div>
+                <% } %>
+                <% for (let i = 0; i < uncompletedTasks; i++) { %>
+                    <div class="h-full grow border-2 rounded border-gray-800"></div>
+                <% } %>
             </div>
         </div>
             <div class="row m-1 p-3">
@@ -27,42 +50,85 @@
                     <form method="POST" action="/" autocomplete="off">
                         <div class="row m-1 p-3">
                             <div class="col col-11 mx-auto">
-                                <div class="row bg-white rounded shadow-sm p-2 add-todo-wrapper align-items-center justify-content-center">
-                                    <div class="col">
-                                        <input class="form-control form-control-lg border-0 add-todo-input bg-transparent rounded" type="text" name="task" placeholder="Add new Task">
+                                <div class="flex bg-white rounded border-2 p-2 add-todo-wrapper align-items-center justify-content-center">
+                                    <div class="flex">
+                                        <input class="form-control form-control-lg border-2 border-gray-300 add-todo-input bg-transparent rounded w-96 font-teachers" type="text" name="task" placeholder="Add new Task">
                                     </div>
-                                    <div class="col-auto px-0 mx-0 mr-2">
+                                    <div class="w-1/12 grow"></div>
+                                    <div class="flex px-0 mr-2 text-xl text-center rounded-lg border-2 border-gray-300 w-20 justify-center bg-gray-800" id="add-btn">
                                         <button type="submit" class="btn btn-primary">Add</button>
                                     </div>
                                 </div>
                             </div>
                         </div>
                     </form>
+                    <form method="POST" action="/todo/destroyall">
+                        <div class="flex">
+                            <div class="grow"></div>
+                            <div class="flex p-2 text-xl text-center rounded-lg border-2 border-gray-300 w-44 mb-4 justify-center bg-gray-800" id="clear-all-btn">
+                            <button type="submit" class="btn btn-primary">Clear All</button>
+                            </div>
+                            <div class="grow"></div>
+                        </div>
+                    </form>
                     <hr>
                     <div class="row">
                         <div class="col-12">
-                            <% if(Object.keys(tasks).length> 0) { %>
+                            <% if(Object.keys(tasks).length > 0) { %>
                                 <ul class="nav flex-column">
                                     <% tasks.forEach(todo=> { %>
-                                        <li class="nav-item">
-                                            <div class="d-flex justify-content-between py-1">
-                                                <div class="d-flex flex-row">
-                                                    <div>
-                                                        <%= todo.task %>
-                                                            <p class="text-muted"><small>
-                                                                    <%= moment(todo.created_at).fromNow() %>
-                                                                </small></p>
-                                                    </div>
+                                        <% if (todo.completed) { %>
+                                            <div class="border-2 p-4 bg-gray-100">
+                                        <% } else { %>
+                                            <div class="border-2 p-4 bg-white">
+                                        <% } %>
+                                            <div class="flex justify-content-between align-items-center py-1">
+                                                <div class="flex align-items-center">
+                                                    <% if (todo.completed) { %>
+                                                        <form method="POST" action="/todo/uncomplete">
+                                                            <button href="javascript:;" onclick="this.parentElement.submit()">
+                                                                <input type="hidden" name="_key" value="<%= todo._id %>">
+                                                                <input checked
+                                                                id="checked-checkbox" type="checkbox" class="checkbox-div w-6 h-6 rounded mb-1 mr-2 outline-1 outline invert" style="outline-color: white"/>
+                                                            </button>
+                                                        </form>
+                                                        <div class="text-gray-400 font-teachers">
+                                                            <%= todo.task %>
+                                                        </div>
+                                                    <% }
+                                                    else { %>
+                                                        <form method="POST" action="/todo/complete">
+                                                            <button href="javascript:;" onclick="this.parentElement.submit()">
+                                                                <input type="hidden" name="_key" value="<%= todo._id %>">
+                                                                <input
+                                                                id="default-checkbox" type="checkbox" class="w-6 h-6 bg-gray-100 border-gray-300 focus:ring-2 focus:ring-gray-300 rounded mb-1 mr-2"/>
+                                                            </button>
+                                                        </form>
+                                                        <div class="font-teachers">
+                                                            <%= todo.task %>
+                                                        </div>
+                                                    <% } %>
                                                 </div>
-                                                <a href="javascript:;" onclick="this.children[0].submit()"
-                                                    class="text-danger">
+                                                <div class="grow"></div>
+                                                <div class="mr-0">
                                                     <form method="POST" action="/todo/destroy">
                                                         <input type="hidden" name="_key" value="<%= todo._id %>" />
+                                                        <a href="javascript:;" onclick="this.parentElement.submit()" class="text-danger mr-0">
+                                                            <svg class="w-6 h-6 text-gray-800 dark:text-white" aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" viewBox="0 0 24 24">
+                                                                <path fill-rule="evenodd" d="M8.586 2.586A2 2 0 0 1 10 2h4a2 2 0 0 1 2 2v2h3a1 1 0 1 1 0 2v12a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V8a1 1 0 0 1 0-2h3V4a2 2 0 0 1 .586-1.414ZM10 6h4V4h-4v2Zm1 4a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Zm4 0a1 1 0 1 0-2 0v8a1 1 0 1 0 2 0v-8Z" clip-rule="evenodd"/>
+                                                            </svg>
+                                                        </a>
                                                     </form>
-                                                    <i class="fa fa-trash-o"></i>
-                                                </a>
+                                                </div>
                                             </div>
-                                        </li>
+                                            <% if (todo.completed == false) { %>
+                                                <p class="text-muted">
+                                                    <small>
+                                                        <%= moment(todo.created_at).fromNow() %>
+                                                    </small>
+                                                </p>
+                                            <% } %>
+                                        </div>
                                         <% }) %>
                                 </ul>
                                 <% } else { %>
@@ -74,6 +140,91 @@
             </div>
         </div>
     </div>
+
+    <script>
+    document.addEventListener("DOMContentLoaded", function(event) { 
+        var scrollpos = localStorage.getItem('scrollpos');
+        if (scrollpos) window.scrollTo(0, scrollpos);
+
+        const percentage = `<%= completionPercentage %>`;
+        const numTasks = `<%= totalTasks %>`;
+        updateCompletionPercentage(percentage, numTasks);
+    });
+
+    window.onbeforeunload = function(e) {
+        localStorage.setItem('scrollpos', window.scrollY);
+    };
+
+    function updateCompletionPercentage(percentage, totalTasks) {
+        let colorClass = 'text-percent-100'; // Default to red
+        let bgColor = '#f87171';
+        let invertColor = '#078e8e';
+        console.log(percentage);
+        if (totalTasks == 0) {
+            colorClass = 'text-percent-1200'; // Green
+            bgColor = '#80f871';
+        } else if (percentage <= 8.33) {
+            colorClass = 'text-percent-100'; // Red
+        } else if (percentage <= 16.66) {
+            colorClass = 'text-percent-200'; // Red-orange
+            bgColor = '#f88c71';
+            invertColor = '#07738e';
+        } else if (percentage <= 25) {
+            colorClass = 'text-percent-300'; // Orange
+            bgColor = '#f8a071';
+            invertColor = '#075f8e';
+        } else if (percentage <= 33.33) {
+            colorClass = 'text-percent-400'; // Yellow-orange
+            bgColor = '#f8b471';
+            invertColor = '#074b8e';
+        } else if (percentage <= 41.66) {
+            colorClass = 'text-percent-500'; // Yellow
+            bgColor = '#f8c871';
+            invertColor = '#07378e';
+        } else if (percentage <= 50) {
+            colorClass = 'text-percent-600'; // Light yellow-green
+            bgColor = '#f8dc71';
+            invertColor = '#07238e';
+        } else if (percentage <= 58.33) {
+            colorClass = 'text-percent-700'; // Light green-yellow
+            bgColor = '#eaf871';
+            invertColor = '#15078e';
+        } else if (percentage <= 66.66) {
+            colorClass = 'text-percent-800'; // Light green
+            bgColor = '#d4f871';
+            invertColor = '#2b078e';
+        } else if (percentage <= 75) {
+            colorClass = 'text-percent-900'; // Green
+            bgColor = '#bff871';
+            invertColor = '#40078e';
+        } else if (percentage <= 83.33) {
+            colorClass = 'text-percent-1000'; // Bright green
+            bgColor = '#aaf871';
+            invertColor = '#55078e';
+        } else if (percentage <= 91.66) {
+            colorClass = 'text-percent-1100'; // Light green-blue
+            bgColor = '#95f871';
+            invertColor = '#6a078e';
+        } else if (percentage <= 100) {
+            colorClass = 'text-percent-1200'; // Green-blue
+            bgColor = '#80f871';
+            invertColor = '#7f078e';
+        }
+
+        document.getElementById('total-completed').className = `text-3xl ${colorClass} mt-2 text-center font-teachers`;
+        document.getElementById('daily-objectives').className = `p-1 text-7xl text-center mx-auto ${colorClass} font-teachers`;
+        document.getElementById('clear-all-btn').className = `flex p-2 text-xl text-center rounded-lg border-2 border-gray-300 w-44 mb-4 justify-center bg-gray-800 ${colorClass} font-teachers`;
+        document.getElementById('add-btn').className = `flex px-0 mr-2 text-xl text-center rounded-lg border-2 border-gray-300 w-20 justify-center bg-gray-800 ${colorClass} font-teachers`;
+        const taskDivs = document.querySelectorAll('.task-div');
+        taskDivs.forEach(div => {
+            div.style.backgroundColor = bgColor;
+        });
+        const checkboxDivs = document.querySelectorAll('.checkbox-div');
+        checkboxDivs.forEach(div => {
+            div.style.backgroundColor = invertColor;
+        });
+    }
+    </script>
 </body>
 
 </html>

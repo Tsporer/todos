@@ -26,9 +26,12 @@ RUN --mount=type=bind,source=package.json,target=package.json \
 # install nodemon for hot-reloading
 RUN npm install -g nodemon
 
+# RUN npm install -g tailwindcss
+
 # Copy the rest of the source files into the image.
 COPY . .
 
+RUN npx tailwindcss build ./src/tailwind.css -o ./dist/output.css
 
 # Run the application as a non-root user.
 RUN  chown -R node /usr/src/app

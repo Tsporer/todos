@@ -1,0 +1,5 @@
+docker compose up -d
+docker compose watch
+
+in another terminal (in app dir):
+npm run watch:css 
